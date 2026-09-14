@@ -20,7 +20,7 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 | View franchise<br/>(as franchisee)                  | franchiseDashboard.tsx |                   |              |
 | Create a store                                      | createStore.tsx |                   |              |
 | Close a store                                       | closeStore.tsx |                   |              |
-| Login as admin<br/>(a@jwt.com, pw: admin)           | login.tsx |                   |              |
+| Login as admin<br/>(a@jwt.com, pw: admin)           | login.tsx | [PUT] api/auth | `SELECT * FROM user WHERE email=?` <br/> `SELECT * FROM userRole WHERE userId=?` <br/> `INSERT INTO auth (token, userId) VALUES (?, ?) ON DUPLICATE KEY UPDATE token=token`|
 | View Admin page                                     | adminDashboard.tsx |                   |              |
 | Create a franchise for t@jwt.com                    | createFranchise.tsx |                   |              |
 | Close the franchise for t@jwt.com                   | closeFranchise.tsx |                   |              |
