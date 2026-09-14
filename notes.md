@@ -15,8 +15,8 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 | View franchise<br/>(as diner)                       | franchiseDashboard.tsx | [GET] /api/franchise/:userId | `SELECT id, name FROM franchise WHERE name LIKE ? LIMIT ${limit + 1} OFFSET ${offset}` <br/> this will return nothing and the entire page will default to whyFranchise() |
 | Logout                                              | logout.tsx | [DELETE] api/auth | `DELETE FROM auth WHERE token=?` |
 | View About page                                     | about.tsx | none | none |
-| View History page                                   | history.tsx |                   |              |
-| Login as franchisee<br/>(f@jwt.com, pw: franchisee) | login.tsx |                   |              |
+| View History page                                   | history.tsx | none | none |
+| Login as franchisee<br/>(f@jwt.com, pw: franchisee) | login.tsx | [PUT] api/auth | `SELECT * FROM user WHERE email=?` <br/> `SELECT * FROM userRole WHERE userId=?` <br/> `INSERT INTO auth (token, userId) VALUES (?, ?) ON DUPLICATE KEY UPDATE token=token`|
 | View franchise<br/>(as franchisee)                  | franchiseDashboard.tsx |                   |              |
 | Create a store                                      | createStore.tsx |                   |              |
 | Close a store                                       | closeStore.tsx |                   |              |
