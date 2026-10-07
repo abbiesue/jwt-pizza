@@ -207,3 +207,11 @@ test('diner dashboard', async ({ page }) => {
     await expect(page.getByRole('table')).toContainText('23');
     await expect(page.getByRole('table')).toContainText('0.008 ₿');
 });
+
+//franchise tests
+test('franchise logged out', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Franchise' }).click();
+
+    await expect(page.getByText('So you want a piece of the pie?')).toBeVisible();
+});
