@@ -6,7 +6,8 @@ async function basicInit(page: Page) {
     let loggedInUser: User | undefined;
     const validUsers: Record<string, User> = { 
         'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] }, 
-        'f@jwt.com': { id: '4', name: 'Francis Owens', email: 'f@jwt.com', password: 'b', roles: [{ role: Role.Franchisee, objectId: '2' }] }
+        'f@jwt.com': { id: '4', name: 'Francis Owens', email: 'f@jwt.com', password: 'b', roles: [{ role: Role.Franchisee, objectId: '2' }] },
+        'a@jwt.com': { id: '5', name: 'Dash Adams', email: 'a@jwt.com', password: 'c', roles: [{ role: Role.Admin }] },
     };
 
     await page.route('*/**/api/auth', async (route) => {
@@ -248,4 +249,20 @@ test ('franchise dashboard', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'LotaPizza' })).toBeVisible();
     await expect(page.getByRole('table')).toContainText('Lehi');
     await expect(page.getByRole('table')).toContainText('1,000 ₿');
+});
+
+//admin tests
+test('admin dashboard', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('c');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+    await page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Admin' }).click();
+
+    await expect(page.getByText("Mama Ricci's kitchen")).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Franchises' })).toBeVisible();
+    await expect(page.getByRole('table')).toContainText('LotaPizza');
+    await expect(page.getByRole('table')).toContainText('Lehi');
 });
