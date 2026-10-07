@@ -7,6 +7,21 @@ async function basicInit(page: Page) {
   const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] } };
 
   await page.route('*/**/api/auth', async (route) => {
+    const method = route.request().method();
+
+    // Register
+    if (method === 'POST') {
+      const registerReq = route.request().postDataJSON();
+      const newUser: User = { id: '4', name: registerReq.name, email: registerReq.email, password: registerReq.password, roles: [{ role: Role.Diner }] };
+      validUsers[newUser.email!] = newUser;
+      loggedInUser = newUser;
+      const registerRes = { user: loggedInUser, token: 'abcdef' };
+      await route.fulfill({ json: registerRes });
+      return;
+    }
+
+    // Login
+    expect(method).toBe('PUT');
     const loginReq = route.request().postDataJSON();
     const user = validUsers[loginReq.email];
     if (!user || user.password !== loginReq.password) {
@@ -18,7 +33,6 @@ async function basicInit(page: Page) {
       user: loggedInUser,
       token: 'abcdef',
     };
-    expect(route.request().method()).toBe('PUT');
     await route.fulfill({ json: loginRes });
   });
 
@@ -69,6 +83,7 @@ async function basicInit(page: Page) {
   await page.goto('/');
 }
 
+//login/ register tests: 
 test('login', async ({ page }) => {
   await basicInit(page);
   await page.getByRole('link', { name: 'Login' }).click();
@@ -79,6 +94,9 @@ test('login', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
 });
 
+
+
+// purchase test: 
 test('purchase with login', async ({ page }) => {
   await basicInit(page);
 
