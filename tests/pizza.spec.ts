@@ -110,6 +110,14 @@ async function basicInit(page: Page) {
         await route.fulfill({ json: userFranchisesRes });
     });
 
+    await page.route(/\/api\/franchise\/\d+\/store$/, async (route) => {
+        expect(route.request().method()).toBe('POST');
+        const createStoreReq = route.request().postDataJSON();
+        expect(createStoreReq).toMatchObject({ name: 'Provo' });
+        const newStore = { id: '8', name: createStoreReq.name, totalRevenue: 0 };
+        await route.fulfill({ json: newStore });
+    });
+
     await page.route('*/**/api/order', async (route) => {
         
         //Display order history
@@ -264,6 +272,24 @@ test ('franchise dashboard', async ({ page }) => {
     await expect(page.getByRole('table')).toContainText('1,000 ₿');
 });
 
+test('franchisee create store', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('b');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'FO' })).toBeVisible();
+    await page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Franchise' }).click();
+    await expect(page.getByRole('heading', { name: 'LotaPizza' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Create store' }).click();
+    await expect(page.getByRole('heading', { name: 'Create store' })).toBeVisible();
+    await page.getByPlaceholder('store name').fill('Provo');
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByRole('heading', { name: 'LotaPizza' })).toBeVisible();
+});
+
 //admin tests
 test('admin dashboard', async ({ page }) => {
     await basicInit(page);
@@ -299,3 +325,4 @@ test('admin create franchise', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Franchises' })).toBeVisible();
     await expect(page.getByText("Mama Ricci's kitchen")).toBeVisible();
 });
+
