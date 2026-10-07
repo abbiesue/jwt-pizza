@@ -4,7 +4,10 @@ import { Role, User } from '../src/service/pizzaService';
 
 async function basicInit(page: Page) {
     let loggedInUser: User | undefined;
-    const validUsers: Record<string, User> = { 'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] } };
+    const validUsers: Record<string, User> = { 
+        'd@jwt.com': { id: '3', name: 'Kai Chen', email: 'd@jwt.com', password: 'a', roles: [{ role: Role.Diner }] }, 
+        'f@jwt.com': { id: '4', name: 'Francis Owens', email: 'f@jwt.com', password: 'b', roles: [{ role: Role.Franchisee, objectId: '2' }] }
+    };
 
     await page.route('*/**/api/auth', async (route) => {
         const method = route.request().method();
@@ -75,6 +78,22 @@ async function basicInit(page: Page) {
         };
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: franchiseRes });
+    });
+
+    await page.route(/\/api\/franchise\/\d+$/, async (route) => {
+        expect(route.request().method()).toBe('GET');
+        const userFranchisesRes = [
+            {
+                id: '2',
+                name: 'LotaPizza',
+                admins: [{ id: '4', name: 'Francis Owens', email: 'f@jwt.com' }],
+                stores: [
+                    { id: '4', name: 'Lehi', totalRevenue: 1000 },
+                    { id: '5', name: 'Springville', totalRevenue: 250 },
+                ],
+            },
+        ];
+        await route.fulfill({ json: userFranchisesRes });
     });
 
     await page.route('*/**/api/order', async (route) => {
@@ -214,4 +233,19 @@ test('franchise logged out', async ({ page }) => {
     await page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Franchise' }).click();
 
     await expect(page.getByText('So you want a piece of the pie?')).toBeVisible();
+});
+
+test ('franchise dashboard', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('b');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'FO' })).toBeVisible();
+    await page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Franchise' }).click();
+
+    await expect(page.getByText('Everything you need to run an JWT Pizza franchise. Your gateway to success.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'LotaPizza' })).toBeVisible();
+    await expect(page.getByRole('table')).toContainText('Lehi');
+    await expect(page.getByRole('table')).toContainText('1,000 ₿');
 });
