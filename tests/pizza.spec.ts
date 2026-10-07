@@ -83,7 +83,7 @@ async function basicInit(page: Page) {
   await page.goto('/');
 }
 
-//login/ register tests: 
+//login/register tests: 
 test('login', async ({ page }) => {
   await basicInit(page);
   await page.getByRole('link', { name: 'Login' }).click();
@@ -92,6 +92,20 @@ test('login', async ({ page }) => {
   await page.getByRole('button', { name: 'Login' }).click();
 
   await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
+});
+
+test('register', async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole('link', { name: 'Register' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome to the party' })).toBeVisible();
+
+  await page.getByPlaceholder('Full name').fill('Pizza Diner');
+  await page.getByPlaceholder('Email address').fill('new@jwt.com');
+  await page.getByPlaceholder('Password').fill('secret');
+  await page.getByRole('button', { name: 'Register' }).click();
+
+  await expect(page.getByRole('link', { name: 'PD' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Register' })).not.toBeVisible();
 });
 
 
