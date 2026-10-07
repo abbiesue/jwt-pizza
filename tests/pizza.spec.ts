@@ -32,7 +32,7 @@ async function basicInit(page: Page) {
         const loginReq = route.request().postDataJSON();
         const user = validUsers[loginReq.email];
         if (!user || user.password !== loginReq.password) {
-            await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+            await route.fulfill({ status: 401, json: { message: 'Unauthorized' } });
             return;
         }
         loggedInUser = validUsers[loginReq.email];
@@ -123,8 +123,20 @@ test ('logout', async ({ page }) => {
     await page.getByRole('button', { name: 'Login' }).click();
     await page.getByRole('link', { name: 'Logout' }).click();
 
-    expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
-    expect(page.getByRole('link', { name: 'PD' })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'KC' })).not.toBeVisible();
+});
+
+test('login with invalid credentials', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page.getByRole('textbox', { name: 'Email address' }).fill('d@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('wrong');
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    await expect(page.getByText('Unauthorized')).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Global' }).getByRole('link', { name: 'Login' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'KC' })).not.toBeVisible();
 });
 
 
