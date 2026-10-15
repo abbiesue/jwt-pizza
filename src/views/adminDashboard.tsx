@@ -19,6 +19,7 @@ interface Props {
 }
 
 export default function AdminDashboard(props: Props) {
+    const usersPerPage = 3;
     const navigate = useNavigate();
     const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({
         franchises: [],
@@ -37,7 +38,11 @@ export default function AdminDashboard(props: Props) {
     React.useEffect(() => {
         (async () => {
             setFranchiseList(
-                await pizzaService.getFranchises(franchisePage, 3, '*')
+                await pizzaService.getFranchises(
+                    franchisePage,
+                    usersPerPage,
+                    '*'
+                )
             );
         })();
     }, [props.user, franchisePage]);
@@ -46,7 +51,11 @@ export default function AdminDashboard(props: Props) {
         (async () => {
             if (Role.isRole(props.user, Role.Admin)) {
                 setUserList(
-                    await pizzaService.getUsers(userPage, 3, userFilter)
+                    await pizzaService.getUsers(
+                        userPage,
+                        usersPerPage,
+                        userFilter
+                    )
                 );
             }
         })();
@@ -81,6 +90,13 @@ export default function AdminDashboard(props: Props) {
     function filterUsers() {
         setUserPage(0);
         setUserFilter(`*${filterUserRef.current?.value}*`);
+    }
+
+    async function deleteUser(user: User) {
+        await pizzaService.deleteUser(user);
+        setUserList(
+            await pizzaService.getUsers(userPage, usersPerPage, userFilter)
+        );
     }
 
     let response = <NotFound />;
@@ -301,6 +317,7 @@ export default function AdminDashboard(props: Props) {
                                             {header}
                                         </th>
                                     ))}
+                                    <th scope="col" className="bg-white" />
                                 </tr>
                             </thead>
                             <tbody>
@@ -312,6 +329,15 @@ export default function AdminDashboard(props: Props) {
                                             {user.roles
                                                 ?.map((r) => r.role)
                                                 .join(', ')}
+                                        </td>
+                                        <td className="px-3 bg-white text-center">
+                                            <button
+                                                aria-label={`Delete ${user.name}`}
+                                                className="font-bold hover:text-red-600"
+                                                onClick={() => deleteUser(user)}
+                                            >
+                                                ✕
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
