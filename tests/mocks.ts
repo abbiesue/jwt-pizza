@@ -35,7 +35,7 @@ export async function basicInit(page: Page) {
         if (method === 'POST') {
             const registerReq = route.request().postDataJSON();
             const newUser: User = {
-                id: '4',
+                id: '99',
                 name: registerReq.name,
                 email: registerReq.email,
                 password: registerReq.password,
@@ -72,6 +72,37 @@ export async function basicInit(page: Page) {
             token: 'abcdef'
         };
         await route.fulfill({ json: loginRes });
+    });
+
+    const userIdRegex = /\/api\/user\/(\d+)$/;
+
+    await page.route(userIdRegex, async (route) => {
+        const userId = route.request().url().match(userIdRegex)![1];
+        const user = Object.values(validUsers).find((u) => u.id === userId)!;
+        const oldEmail: string = user.email!;
+        const updateReq = route.request().postDataJSON();
+
+        if (updateReq.name) {
+            user.name = updateReq.name;
+        }
+        if (updateReq.email) {
+            user.email = updateReq.email;
+        }
+        if (updateReq.password) {
+            user.password = updateReq.password;
+        }
+
+        if (user.email !== oldEmail) {
+            delete validUsers[oldEmail];
+            validUsers[user.email!] = user;
+        }
+
+        loggedInUser = user;
+
+        expect(route.request().method()).toBe('PUT');
+        await route.fulfill({
+            json: { user: { ...user, password: undefined }, token: 'abcdef' }
+        });
     });
 
     await page.route('*/**/api/user/me', async (route) => {
