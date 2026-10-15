@@ -105,6 +105,15 @@ export async function basicInit(page: Page) {
         });
     });
 
+    await page.route(/\/api\/user(\?.*)?$/, async (route) => {
+        expect(route.request().method()).toBe('GET');
+        const users = Object.values(validUsers).map((u) => ({
+            ...u,
+            password: undefined
+        }));
+        await route.fulfill({ json: { users, more: false } });
+    });
+
     await page.route('*/**/api/user/me', async (route) => {
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: loggedInUser });
