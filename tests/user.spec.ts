@@ -172,3 +172,27 @@ test('list users filter', async ({ page }) => {
     await expect(usersTable).toContainText('Kai Chen');
     await expect(usersTable).not.toContainText('Francis Owens');
 });
+
+test('delete user', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page
+        .getByRole('textbox', { name: 'Email address' })
+        .fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('c');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+    await page
+        .getByRole('navigation', { name: 'Global' })
+        .getByRole('link', { name: 'Admin' })
+        .click();
+
+    const usersTable = page.getByRole('table', { name: 'Users' });
+    await expect(usersTable).toContainText('Kai Chen');
+    await expect(usersTable).not.toContainText('Bea Bright');
+
+    await page.getByRole('button', { name: 'Delete Kai Chen' }).click();
+
+    await expect(usersTable).not.toContainText('Kai Chen');
+    await expect(usersTable).toContainText('Bea Bright');
+});
