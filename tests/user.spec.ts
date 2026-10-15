@@ -115,3 +115,60 @@ test('list users', async ({ page }) => {
     await expect(kaiRow).toContainText('d@jwt.com');
     await expect(kaiRow).toContainText('diner');
 });
+
+test('list users paging', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page
+        .getByRole('textbox', { name: 'Email address' })
+        .fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('c');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+    await page
+        .getByRole('navigation', { name: 'Global' })
+        .getByRole('link', { name: 'Admin' })
+        .click();
+
+    const usersTable = page.getByRole('table', { name: 'Users' });
+    const nextPage = page.getByRole('button', { name: 'Next users page' });
+    const prevPage = page.getByRole('button', { name: 'Previous users page' });
+
+    await expect(usersTable).toContainText('Kai Chen');
+    await expect(usersTable).not.toContainText('Bea Bright');
+    await expect(prevPage).toBeDisabled();
+    await expect(nextPage).toBeEnabled();
+
+    await nextPage.click();
+    await expect(usersTable).toContainText('Bea Bright');
+    await expect(usersTable).not.toContainText('Kai Chen');
+    await expect(nextPage).toBeDisabled();
+    await expect(prevPage).toBeEnabled();
+
+    await prevPage.click();
+    await expect(usersTable).toContainText('Kai Chen');
+});
+
+test('list users filter', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page
+        .getByRole('textbox', { name: 'Email address' })
+        .fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('c');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+    await page
+        .getByRole('navigation', { name: 'Global' })
+        .getByRole('link', { name: 'Admin' })
+        .click();
+
+    const usersTable = page.getByRole('table', { name: 'Users' });
+    await expect(usersTable).toContainText('Francis Owens');
+
+    await page.getByPlaceholder('Filter users').fill('Kai');
+    await page.getByRole('button', { name: 'Search' }).click();
+
+    await expect(usersTable).toContainText('Kai Chen');
+    await expect(usersTable).not.toContainText('Francis Owens');
+});

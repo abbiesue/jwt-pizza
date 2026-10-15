@@ -46,7 +46,7 @@ export default function AdminDashboard(props: Props) {
         (async () => {
             if (Role.isRole(props.user, Role.Admin)) {
                 setUserList(
-                    await pizzaService.getUsers(userPage, 10, userFilter)
+                    await pizzaService.getUsers(userPage, 3, userFilter)
                 );
             }
         })();

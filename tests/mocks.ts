@@ -25,6 +25,13 @@ export async function basicInit(page: Page) {
             email: 'a@jwt.com',
             password: 'c',
             roles: [{ role: Role.Admin }]
+        },
+        'b@jwt.com': {
+            id: '6',
+            name: 'Bea Bright',
+            email: 'b@jwt.com',
+            password: 'e',
+            roles: [{ role: Role.Diner }]
         }
     };
 
@@ -107,11 +114,22 @@ export async function basicInit(page: Page) {
 
     await page.route(/\/api\/user(\?.*)?$/, async (route) => {
         expect(route.request().method()).toBe('GET');
-        const users = Object.values(validUsers).map((u) => ({
-            ...u,
-            password: undefined
-        }));
-        await route.fulfill({ json: { users, more: false } });
+        const url = new URL(route.request().url());
+        const page = Number(url.searchParams.get('page')) || 0;
+        const limit = Number(url.searchParams.get('limit')) || 10;
+        const nameFilter = (url.searchParams.get('name') || '*')
+            .replace(/\*/g, '')
+            .toLowerCase();
+
+        const matching = Object.values(validUsers)
+            .filter((u) => u.name!.toLowerCase().includes(nameFilter))
+            .map((u) => ({ ...u, password: undefined }));
+
+        const start = page * limit;
+        const users = matching.slice(start, start + limit);
+        const more = matching.length > start + limit;
+
+        await route.fulfill({ json: { users, more } });
     });
 
     await page.route('*/**/api/user/me', async (route) => {
