@@ -84,8 +84,19 @@ export async function basicInit(page: Page) {
     const userIdRegex = /\/api\/user\/(\d+)$/;
 
     await page.route(userIdRegex, async (route) => {
+        const method = route.request().method();
         const userId = route.request().url().match(userIdRegex)![1];
         const user = Object.values(validUsers).find((u) => u.id === userId)!;
+
+        // Delete user
+        if (method === 'DELETE') {
+            delete validUsers[user.email!];
+            await route.fulfill({ json: { message: 'user deleted' } });
+            return;
+        }
+
+        // Update User
+        expect(method).toBe('PUT');
         const oldEmail: string = user.email!;
         const updateReq = route.request().postDataJSON();
 
@@ -105,7 +116,6 @@ export async function basicInit(page: Page) {
         }
 
         loggedInUser = user;
-
         expect(route.request().method()).toBe('PUT');
         await route.fulfill({
             json: { user: { ...user, password: undefined }, token: 'abcdef' }
