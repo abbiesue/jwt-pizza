@@ -282,57 +282,76 @@ export default function AdminDashboard(props: Props) {
                         onPress={createFranchise}
                     />
                 </div>
-                <h3>Users</h3>
-                <table aria-label="Users">
-                    <thead>
-                        <tr>
-                            {['Name', 'Email', 'Role'].map((header) => (
-                                <th key={header} scope="col">
-                                    {header}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {userList.users.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>
-                                    {user.roles?.map((r) => r.role).join(', ')}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colSpan={2}>
-                                <input
-                                    type="text"
-                                    ref={filterUserRef}
-                                    placeholder="Filter users"
-                                />
-                                <button onClick={filterUsers}>Search</button>
-                            </td>
-                            <td>
-                                <button
-                                    aria-label="Previous users page"
-                                    onClick={() => setUserPage(userPage - 1)}
-                                    disabled={userPage <= 0}
-                                >
-                                    «
-                                </button>
-                                <button
-                                    aria-label="Next users page"
-                                    onClick={() => setUserPage(userPage + 1)}
-                                    disabled={!userList.more}
-                                >
-                                    »
-                                </button>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+                <div className="my-8 mx-auto max-w-2xl bg-white border-2 border-gray-700 p-3 text-start text-black">
+                    <h3 className="text-xl font-bold mb-2">Users</h3>
+
+                    <div className="border border-gray-700 p-3">
+                        <table
+                            aria-label="Users"
+                            className="w-full bg-neutral-100"
+                        >
+                            <thead>
+                                <tr>
+                                    {['Name', 'Email', 'Role'].map((header) => (
+                                        <th
+                                            key={header}
+                                            scope="col"
+                                            className="px-3 pt-3 pb-1 text-start font-bold"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {userList.users.map((user) => (
+                                    <tr key={user.id}>
+                                        <td className="px-3">{user.name}</td>
+                                        <td className="px-3">{user.email}</td>
+                                        <td className="px-3">
+                                            {user.roles
+                                                ?.map((r) => r.role)
+                                                .join(', ')}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-3">
+                        <input
+                            type="text"
+                            ref={filterUserRef}
+                            placeholder="Filter users"
+                            className="border border-gray-700 px-2 py-1 w-32"
+                        />
+                        <button
+                            className="border border-gray-700 px-4 py-1 hover:bg-gray-100"
+                            onClick={filterUsers}
+                        >
+                            Search
+                        </button>
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                aria-label="Previous users page"
+                                className="border border-gray-700 px-4 py-1 hover:bg-gray-100 disabled:opacity-40"
+                                onClick={() => setUserPage(userPage - 1)}
+                                disabled={userPage <= 0}
+                            >
+                                Prev
+                            </button>
+                            <button
+                                aria-label="Next users page"
+                                className="border border-gray-700 px-4 py-1 hover:bg-gray-100 disabled:opacity-40"
+                                onClick={() => setUserPage(userPage + 1)}
+                                disabled={!userList.more}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </View>
         );
     }
