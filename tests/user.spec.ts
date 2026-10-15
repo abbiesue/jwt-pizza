@@ -93,3 +93,21 @@ test('update as franchisee', async ({ page }) => {
     await expect(page.getByRole('main')).toContainText('Franchisee on 2');
     await expect(page.getByText('Francis Updated')).toBeVisible();
 });
+
+test('list users', async ({ page }) => {
+    basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page
+        .getByRole('textbox', { name: 'Email address' })
+        .fill('a@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('c');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+    const usersTable = page.getByRole('table', { name: 'Users' });
+    const kaiRow = usersTable.getByRole('row').filter({ hasText: 'Kai Chen' });
+
+    await expect(kaiRow).toContainText('d@jwt.com');
+    await expect(kaiRow).toContainText('diner');
+});
