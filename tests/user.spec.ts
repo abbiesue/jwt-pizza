@@ -67,3 +67,29 @@ test('update user email and password', async ({ page }) => {
 
     await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
 });
+
+test('update as franchisee', async ({ page }) => {
+    await basicInit(page);
+    await page.getByRole('link', { name: 'Login' }).click();
+    await page
+        .getByRole('textbox', { name: 'Email address' })
+        .fill('f@jwt.com');
+    await page.getByRole('textbox', { name: 'Password' }).fill('b');
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    await page.getByRole('link', { name: 'FO' }).click();
+    await expect(page.getByText('Franchisee on 2')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Edit' }).click();
+    await expect(page.locator('h3')).toContainText('Edit user');
+    await page
+        .getByRole('dialog')
+        .getByRole('textbox', { name: 'name', exact: true })
+        .fill('Francis Updated');
+    await page.getByRole('button', { name: 'Update' }).click();
+
+    await page.waitForSelector('[role="dialog"].hidden', { state: 'attached' });
+
+    await expect(page.getByRole('main')).toContainText('Franchisee on 2');
+    await expect(page.getByText('Francis Updated')).toBeVisible();
+});
