@@ -206,8 +206,12 @@ test('admin dashboard', async ({ page }) => {
     await expect(
         page.getByRole('heading', { name: 'Franchises' })
     ).toBeVisible();
-    await expect(page.getByRole('table')).toContainText('LotaPizza');
-    await expect(page.getByRole('table')).toContainText('Lehi');
+    await expect(page.getByRole('table', { name: 'Franchises' })).toContainText(
+        'LotaPizza'
+    );
+    await expect(page.getByRole('table', { name: 'Franchises' })).toContainText(
+        'Lehi'
+    );
 });
 
 //admin create franchise test

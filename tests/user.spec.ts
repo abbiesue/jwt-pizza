@@ -95,7 +95,7 @@ test('update as franchisee', async ({ page }) => {
 });
 
 test('list users', async ({ page }) => {
-    basicInit(page);
+    await basicInit(page);
     await page.getByRole('link', { name: 'Login' }).click();
     await page
         .getByRole('textbox', { name: 'Email address' })
@@ -103,6 +103,10 @@ test('list users', async ({ page }) => {
     await page.getByRole('textbox', { name: 'Password' }).fill('c');
     await page.getByRole('button', { name: 'Login' }).click();
     await expect(page.getByRole('link', { name: 'DA' })).toBeVisible();
+    await page
+        .getByRole('navigation', { name: 'Global' })
+        .getByRole('link', { name: 'Admin' })
+        .click();
 
     await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
     const usersTable = page.getByRole('table', { name: 'Users' });
